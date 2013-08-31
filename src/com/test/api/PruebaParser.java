@@ -4,24 +4,31 @@
  */
 package com.test.api;
 
+import java.util.Scanner;
+
 import com.protocolanalyzer.api.Clock;
 import com.protocolanalyzer.api.I2CProtocol;
 import com.protocolanalyzer.api.LogicBitSet;
 import com.protocolanalyzer.api.LogicHelper;
-import com.protocolanalyzer.api.Protocol;
+import com.protocolanalyzer.api.Protocol.ProtocolType;
 import com.protocolanalyzer.api.UARTProtocol;
 
-/**
- *
- * @author andres
- */
 public class PruebaParser {
     
     public static void main(String[] args){
-        final Protocol.ProtocolType mType = Protocol.ProtocolType.I2C;
+    	ProtocolType mType;
+        Scanner inputScanner = new Scanner(System.in);
         long start, end;
+        
+        // Listado de protocolos para elejir
+        System.out.println("Ingrese el tipo de protocolo: ");
+        for(ProtocolType mProtocolType : ProtocolType.values()){
+            System.out.println(" - " + mProtocolType.toString());
+        }
+        
+        mType = ProtocolType.valueOf(inputScanner.next());
 
-        if(mType == Protocol.ProtocolType.UART){
+        if(mType == ProtocolType.UART){
             LogicBitSet data;
             UARTProtocol channelUART = new UARTProtocol(200000);
 
@@ -44,7 +51,7 @@ public class PruebaParser {
                 System.out.println("Parser - String " + n + " position: " + channelUART.getDecodedData().get(n).startTime());
             }
         }
-        else if(mType == Protocol.ProtocolType.I2C){
+        else if(mType == ProtocolType.I2C){
             LogicBitSet dataI2C, clkI2C;
 
             I2CProtocol channelI2C = new I2CProtocol(400000);
@@ -76,5 +83,6 @@ public class PruebaParser {
             }
             System.out.println("Parser - Data Decoded in " + (end-start) + " mS");
         }
+        inputScanner.close();
     }
 }

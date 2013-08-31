@@ -8,7 +8,7 @@ public class UARTProtocol extends Protocol{
 	private boolean is9Bits = false;
 	
 	public UARTProtocol(long freq) {
-		super(freq);
+            super(freq);
 	}
 
 	/**
@@ -118,5 +118,4 @@ public class UARTProtocol extends Protocol{
 	public boolean is9BitsMode (){
 		return is9Bits;
 	}
-
 }
