@@ -18,6 +18,17 @@ public class LogicHelper {
 	}
 	
 	/**
+	 * Testea un bit dentro de un byte
+	 * @author Andres Torti
+	 * @param a int para testear
+	 * @param bit numero de bit a testear 0-31
+	 * @see http://en.wikipedia.org/wiki/Mask_(computing) (Mask bits)
+	 */
+	public static boolean bitTest (int a, int bit) {
+		return (a & (1 << bit)) != 0;
+	}
+	
+	/**
 	 * Setea un bit dentro de un byte al estado dado
 	 * @param a byte el cual modificar
 	 * @param state true o false
