@@ -16,28 +16,42 @@ import com.protocolanalyzer.api.UARTProtocol;
 public class PruebaParser {
     
     public static void main(String[] args){
-    	ProtocolType mType;
+    	ProtocolType mType = ProtocolType.NONE;
         Scanner inputScanner = new Scanner(System.in);
         long start, end;
         
         // Listado de protocolos para elejir
         System.out.println("Ingrese el tipo de protocolo: ");
         for(ProtocolType mProtocolType : ProtocolType.values()){
-            System.out.println(" - " + mProtocolType.toString());
+        	if(mProtocolType != ProtocolType.NONE && mProtocolType != ProtocolType.CLOCK)
+        		System.out.println(" - " + mProtocolType.toString());
         }
         
-        mType = ProtocolType.valueOf(inputScanner.next());
+        // Leo el protocolo
+        while(mType == ProtocolType.NONE){
+        	try {
+        		mType = ProtocolType.valueOf(inputScanner.next().toUpperCase());
+			} catch (IllegalArgumentException e) {
+				System.out.println("No existe el protocolo vuelva a intentar");
+			}
+        }
 
         if(mType == ProtocolType.UART){
+        	System.out.println("******************************************");
+        	System.out.println("*             UART PROTOCOL              *");
+        	System.out.println("******************************************");
+        	
             LogicBitSet data;
             UARTProtocol channelUART = new UARTProtocol(200000);
 
             System.out.println("Parser - Parsing");
-            data = LogicHelper.bitParser("1101101010011", 21, 1);
+            data = LogicHelper.bitParser("110110101011", 21, 1);
 
             channelUART.setBaudRate(9600);			// 9600 Baudios
             channelUART.setChannelBitsData(data);	// Bits
             channelUART.set9BitsMode(false);
+            channelUART.setTwoStopBits(true);
+            channelUART.setParity(UARTProtocol.Parity.NoParity);
 
             start = System.currentTimeMillis();
             System.out.println("Parser - Decoding");
@@ -45,13 +59,18 @@ public class PruebaParser {
             System.out.println("Parser - Decoded");	
             end = System.currentTimeMillis();
 
-            System.out.println("Parser - Data decoded in: " + (end-start) + " mS");
             for(int n = 0; n < channelUART.getDecodedData().size(); ++n){
                 System.out.println("Parser - String " + n + ": " + channelUART.getDecodedData().get(n).getString());
                 System.out.println("Parser - String " + n + " position: " + channelUART.getDecodedData().get(n).startTime());
             }
+            System.out.println("******************************************");
         }
+        
         else if(mType == ProtocolType.I2C){
+        	System.out.println("******************************************");
+        	System.out.println("*              I2C PROTOCOL              *");
+        	System.out.println("******************************************");
+        	
             LogicBitSet dataI2C, clkI2C;
 
             I2CProtocol channelI2C = new I2CProtocol(400000);
@@ -82,6 +101,7 @@ public class PruebaParser {
                 System.out.println("Parser - String " + n + " position: " + String.format("%.3f", channelI2C.getDecodedData().get(n).startTime()*1000) + " uS");
             }
             System.out.println("Parser - Data Decoded in " + (end-start) + " mS");
+            System.out.println("******************************************");
         }
         inputScanner.close();
     }
