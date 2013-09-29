@@ -10,7 +10,16 @@ public abstract class Protocol {
 	 * @author andres
 	 */
 	public enum ProtocolType {
-		UART, I2C, CLOCK, NONE
+		I2C(1), UART(2), CLOCK(3), NONE(-1);
+		
+		private final int value;
+		private ProtocolType(int value){
+			this.value = value;
+		}
+		
+		public int getValue(){
+			return value;
+		}
 	}
 	
 	/** Contiene un String con las posiciones iniciales y finales del mismo en el tiempo */
@@ -44,7 +53,7 @@ public abstract class Protocol {
 	 * @return
 	 */
 	public LogicBitSet getChannelBitsData (){
-               return logicData;
+		return logicData;
 	}
 	
 	/**
