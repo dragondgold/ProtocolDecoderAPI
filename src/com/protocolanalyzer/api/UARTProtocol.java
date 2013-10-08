@@ -208,4 +208,9 @@ public class UARTProtocol extends Protocol{
 	public boolean isTwoStopBits (){
 		return twoStopBits;
 	}
+
+	@Override
+	public boolean hasClock() {
+		return false;
+	}
 }

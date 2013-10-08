@@ -280,4 +280,9 @@ public class I2CProtocol extends Protocol{
 		return clockSource;
 	}
 
+	@Override
+	public boolean hasClock() {
+		return true;
+	}
+
 }

@@ -42,6 +42,12 @@ public abstract class Protocol {
 	public abstract ProtocolType getProtocol();
 	
 	/**
+	 * Indica si el protocolo requiere o no de una fuente de clock
+	 * @return
+	 */
+	public abstract boolean hasClock();
+	
+	/**
 	 * @param freq, frecuencia de muestreo
 	 */
 	public Protocol (long freq){

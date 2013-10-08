@@ -16,4 +16,9 @@ public class EmptyProtocol extends Protocol{
 		return ProtocolType.NONE;
 	}
 
+	@Override
+	public boolean hasClock() {
+		return false;
+	}
+
 }
