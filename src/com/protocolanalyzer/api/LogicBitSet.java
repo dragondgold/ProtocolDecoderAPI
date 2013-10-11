@@ -64,7 +64,7 @@ public class LogicBitSet extends BitSet{
 	/**
 	 * Constructor
 	 */
-	LogicBitSet(){
+	public LogicBitSet(){
 		super();	// Creo un BitSet
 		currentSize = 0;
 	}
@@ -73,7 +73,7 @@ public class LogicBitSet extends BitSet{
 	 * Constructor con tamaño del BitSet
 	 * @param size es el tamaño del BitSet
 	 */
-	LogicBitSet(int size){
+	public LogicBitSet(int size){
 		super(size);
 	}
 	
