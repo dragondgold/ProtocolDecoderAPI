@@ -1,5 +1,7 @@
 package com.protocolanalyzer.api;
 
+import com.protocolanalyzer.api.utils.Configuration;
+
 public class UARTProtocol extends Protocol{
 
 	private static final boolean DEBUG = false;
@@ -12,8 +14,54 @@ public class UARTProtocol extends Protocol{
 	private boolean twoStopBits = false;
 	private Parity mParity = Parity.NoParity;
 	
-	public UARTProtocol(long freq) {
-		super(freq);
+	/**
+	 * Propiedades que deben existir en el objeto Properties pasado:
+	 * "BaudRate" + id	-> Baudios
+	 * "nineData" + id	-> Dato de 9 bits
+	 * "dualStop" + id	-> Indica si hay o no dos bits de stop
+	 * "Parity"   + id  -> Sin paridad, paridad even, paridad odd dependiendo del numero ordinal del enum 
+	 * (Parity.Even.ordinal())
+	 * @param freq
+	 * @param prop
+	 * @param id
+	 */
+	public UARTProtocol(long freq, Configuration prop, int id) {
+		super(freq, prop, id);
+		loadFromProperties();
+	}
+	
+	/**
+	 * Define las propiedades del canal
+	 * @param prop
+	 */
+	@Override
+	public void setProperties (Configuration prop){
+		mProperties = prop;
+		invalidateProperties();
+	}
+	
+	@Override
+	public boolean invalidateProperties (){
+		return loadFromProperties();
+	}
+	
+	private boolean loadFromProperties(){
+		if(mProperties == null) return false;
+		try {
+			baudRate = mProperties.getInteger("BaudRate" + mID);
+			is9Bits = mProperties.getBoolean("nineData" + mID);
+			twoStopBits = mProperties.getBoolean("dualStop" + mID);
+			
+			int parity = mProperties.getInteger("Parity" + mID);
+			setParity(Parity.values()[parity]);
+			
+		} catch (NullPointerException e) {
+			throw new NullPointerException("No se han definido todos los parametro en protocolo UART canal " + mID);
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -32,6 +80,7 @@ public class UARTProtocol extends Protocol{
 	 */
 	@Override
 	public void decode(double startTime) {
+		loadFromProperties();
 			
 		if(DEBUG) System.out.println("UARTDecode - UART Protocol decode");
 		if(DEBUG) System.out.println("UARTDecode - Source lenght: " + logicData.length());

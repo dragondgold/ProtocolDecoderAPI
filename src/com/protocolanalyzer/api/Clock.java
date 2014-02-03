@@ -1,9 +1,11 @@
 package com.protocolanalyzer.api;
 
+import com.protocolanalyzer.api.utils.Configuration;
+
 public class Clock extends Protocol{
 
-	public Clock(long freq) {
-		super(freq);
+	public Clock(long freq, Configuration prop, int id) {
+		super(freq, prop, id);
 	}
 
 	@Override
@@ -13,6 +15,21 @@ public class Clock extends Protocol{
 	@Override
 	public ProtocolType getProtocol() {
 		return ProtocolType.CLOCK;
+	}
+	
+	/**
+	 * Define las propiedades del canal
+	 * @param prop
+	 */
+	@Override
+	public void setProperties (Configuration prop){
+		mProperties = prop;
+		invalidateProperties();
+	}
+	
+	@Override
+	public boolean invalidateProperties (){
+		return false;
 	}
 	
 	/**

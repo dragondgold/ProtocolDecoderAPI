@@ -1,14 +1,30 @@
 package com.protocolanalyzer.api;
 
 import com.protocolanalyzer.api.utils.ClockNotDefinedException;
+import com.protocolanalyzer.api.utils.Configuration;
 
 public class I2CProtocol extends Protocol{
 
 	private static final boolean DEBUG = false;
 	private Clock clockSource = null;
 	
-	public I2CProtocol(long freq) {
-		super(freq);
+	public I2CProtocol(long freq, Configuration prop, int id) {
+		super(freq, prop, id);
+	}
+	
+	/**
+	 * Define las propiedades del canal
+	 * @param prop
+	 */
+	@Override
+	public void setProperties (Configuration prop){
+		mProperties = prop;
+		invalidateProperties();
+	}
+	
+	@Override
+	public boolean invalidateProperties (){
+		return false;
 	}
 	
 	/**

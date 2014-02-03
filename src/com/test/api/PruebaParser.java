@@ -11,7 +11,9 @@ import com.protocolanalyzer.api.I2CProtocol;
 import com.protocolanalyzer.api.LogicBitSet;
 import com.protocolanalyzer.api.LogicHelper;
 import com.protocolanalyzer.api.Protocol.ProtocolType;
+import com.protocolanalyzer.api.UARTProtocol.Parity;
 import com.protocolanalyzer.api.UARTProtocol;
+import com.protocolanalyzer.api.utils.Configuration;
 
 public class PruebaParser {
     
@@ -42,16 +44,23 @@ public class PruebaParser {
         	System.out.println("******************************************");
         	
             LogicBitSet data;
-            UARTProtocol channelUART = new UARTProtocol(200000);
+            Configuration config = new Configuration();
+            config.setProperty("BaudRate0", 9600);
+            config.setProperty("nineData0", false);
+            config.setProperty("dualStop0", false);
+            config.setProperty("Parity0", Parity.NoParity.ordinal());
+            
+            UARTProtocol channelUART = new UARTProtocol(200000, config, 0);
 
             System.out.println("Parser - Parsing");
             data = LogicHelper.bitParser("110110101011", 21, 1);
-
-            channelUART.setBaudRate(9600);			// 9600 Baudios
             channelUART.setChannelBitsData(data);	// Bits
+            
+            /*
+            channelUART.setBaudRate(9600);			// 9600 Baudios
             channelUART.set9BitsMode(false);
             channelUART.setTwoStopBits(true);
-            channelUART.setParity(UARTProtocol.Parity.NoParity);
+            channelUART.setParity(UARTProtocol.Parity.NoParity);*/
 
             start = System.currentTimeMillis();
             System.out.println("Parser - Decoding");
@@ -59,6 +68,7 @@ public class PruebaParser {
             System.out.println("Parser - Decoded");	
             end = System.currentTimeMillis();
 
+            System.out.println(channelUART.getDecodedData().size() + " decoded data");
             for(int n = 0; n < channelUART.getDecodedData().size(); ++n){
                 System.out.println("Parser - String " + n + ": " + channelUART.getDecodedData().get(n).getString());
                 System.out.println("Parser - String " + n + " position: " + channelUART.getDecodedData().get(n).startTime());
@@ -73,8 +83,8 @@ public class PruebaParser {
         	
             LogicBitSet dataI2C, clkI2C;
 
-            I2CProtocol channelI2C = new I2CProtocol(400000);
-            Clock clockI2C = new Clock(400000);
+            I2CProtocol channelI2C = new I2CProtocol(400000, null, 0);
+            Clock clockI2C = new Clock(400000, null, 0);
 
             System.out.println("Parser - Parsing");
             //								  S		  Address        A 		  Byte		  A  	   Byte       A   ST

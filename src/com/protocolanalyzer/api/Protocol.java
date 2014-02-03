@@ -3,6 +3,8 @@ package com.protocolanalyzer.api;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.protocolanalyzer.api.utils.Configuration;
+
 public abstract class Protocol {
 	
 	/**
@@ -28,6 +30,10 @@ public abstract class Protocol {
 	protected LogicBitSet logicData = new LogicBitSet();
 	/** Velocidad de muestreo con la que se tomo el canal */
 	protected long sampleFrec = 0;
+	/** Propiedades del canal */
+	protected Configuration mProperties;
+	/** Identificacion del canal usada para la carga de las propiedades */
+	protected final int mID;
 	
 	/**
 	 * Implementacion independiente de la decodificación del protocolo
@@ -48,10 +54,28 @@ public abstract class Protocol {
 	public abstract boolean hasClock();
 	
 	/**
+	 * Define las propiedades del canal
+	 * @param prop
+	 */
+	public abstract void setProperties (Configuration prop);
+	
+	/**
+	 * Fuerza la actualizacion de las propiedades
+	 * @return true si se actualizan las propiedades, false si hay un error o no existe el objeto
+	 */
+	public abstract boolean invalidateProperties();
+	
+	public Configuration getProperties (){
+		return mProperties;
+	}
+	
+	/**
 	 * @param freq, frecuencia de muestreo
 	 */
-	public Protocol (long freq){
+	public Protocol (long freq, Configuration prop, int id){
 		sampleFrec = freq;
+		mProperties = prop;
+		mID = id;
 	}
 	
 	/**
