@@ -47,20 +47,13 @@ public class UARTProtocol extends Protocol{
 	
 	private boolean loadFromProperties(){
 		if(mProperties == null) return false;
-		try {
-			baudRate = mProperties.getInteger("BaudRate" + mID);
-			is9Bits = mProperties.getBoolean("nineData" + mID);
-			twoStopBits = mProperties.getBoolean("dualStop" + mID);
-			
-			int parity = mProperties.getInteger("Parity" + mID);
-			setParity(Parity.values()[parity]);
-			
-		} catch (NullPointerException e) {
-			throw new NullPointerException("No se han definido todos los parametro en protocolo UART canal " + mID);
-		} catch (NoSuchFieldException e) {
-			e.printStackTrace();
-			return false;
-		}
+		
+		baudRate = mProperties.getInteger("BaudRate" + mID, baudRate);
+		is9Bits = mProperties.getBoolean("nineData" + mID, is9Bits);
+		twoStopBits = mProperties.getBoolean("dualStop" + mID, twoStopBits);
+		
+		int parity = mProperties.getInteger("Parity" + mID, Parity.NoParity.ordinal());
+		setParity(Parity.values()[parity]);
 		return true;
 	}
 

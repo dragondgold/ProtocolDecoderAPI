@@ -12,21 +12,21 @@ public class Configuration extends Properties{
 		setProperty(key, "i" + value);
 	}
 	
-	public boolean getBoolean (String key) throws NoSuchFieldException{
+	public boolean getBoolean (String key, boolean defaultValue) {
 		String p = getProperty(key);
 		if(p.charAt(0) == 'b'){
 			if(p.charAt(1) == '1') return true;
 			else return false;
 		}
-		throw new NoSuchFieldException("Key: " + key + " no es boolean");
+		return defaultValue;
 	}
 	
-	public int getInteger (String key) throws NoSuchFieldException{
+	public int getInteger (String key, int defaultValue) {
 		String p = getProperty(key);
 		if(p.charAt(0) == 'i'){
 			return Integer.valueOf(p.substring(1));
 		}
-		throw new NoSuchFieldException("Key: " + key + " no es entero (int)");
+		return defaultValue;
 	}
 	
 }
