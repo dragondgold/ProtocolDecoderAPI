@@ -16,10 +16,10 @@ public class UARTProtocol extends Protocol{
 	
 	/**
 	 * Propiedades que deben existir en el objeto Properties pasado:
-	 * "BaudRate" + id	-> Baudios
-	 * "nineData" + id	-> Dato de 9 bits
-	 * "dualStop" + id	-> Indica si hay o no dos bits de stop
-	 * "Parity"   + id  -> Sin paridad, paridad even, paridad odd dependiendo del numero ordinal del enum 
+	 * "BaudRate" + id	-> Baudios (int)
+	 * "nineData" + id	-> Dato de 9 bits (boolean)
+	 * "dualStop" + id	-> Indica si hay o no dos bits de stop (boolean)
+	 * "Parity"   + id  -> Sin paridad, paridad even, paridad odd dependiendo del numero ordinal del enum (int) 
 	 * (Parity.Even.ordinal())
 	 * @param freq
 	 * @param prop
