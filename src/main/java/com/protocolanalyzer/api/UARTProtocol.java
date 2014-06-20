@@ -1,6 +1,5 @@
 package com.protocolanalyzer.api;
 
-import com.protocolanalyzer.api.utils.Configuration;
 import com.protocolanalyzer.api.utils.PrintDebug;
 
 public class UARTProtocol extends Protocol{
@@ -13,49 +12,13 @@ public class UARTProtocol extends Protocol{
 	private int baudRate = 9600;
 	private boolean is9Bits = false;
 	private boolean twoStopBits = false;
-	private Parity mParity = Parity.NoParity;
+	private Parity parity = Parity.NoParity;
 	
 	/**
-	 * Properties that must exists in the {@link com.protocolanalyzer.api.utils.Configuration} object passed.
-     *
-     * <pre>
-     * {@code
-	 * "BaudRate" + id  -> Bauds (int)
-	 * "nineData" + id  -> Is 9 bits data? (boolean)
-	 * "dualStop" + id  -> Is two stop bits? (boolean)
-	 * "Parity"   + id  -> Parity as defined in Enum (int) ( ie: Parity.Even.ordinal() )
-     * }
-     * </pre>
 	 * @param freq sample frequency in Hz
-	 * @param prop {@link com.protocolanalyzer.api.utils.Configuration} object containing channel settings
-	 * @param id channel id
 	 */
-	public UARTProtocol(long freq, Configuration prop, int id) {
-		super(freq, prop, id);
-		loadFromProperties();
-	}
-
-	@Override
-	public void setProperties (Configuration prop){
-		mProperties = prop;
-		invalidateProperties();
-	}
-	
-	@Override
-	public boolean invalidateProperties (){
-		return loadFromProperties();
-	}
-	
-	private boolean loadFromProperties(){
-		if(mProperties == null) return false;
-		
-		baudRate = mProperties.getInteger("BaudRate" + mID, baudRate);
-		is9Bits = mProperties.getBoolean("nineData" + mID, is9Bits);
-		twoStopBits = mProperties.getBoolean("dualStop" + mID, twoStopBits);
-		
-		int parity = mProperties.getInteger("Parity" + mID, Parity.NoParity.ordinal());
-		setParity(Parity.values()[parity]);
-		return true;
+	public UARTProtocol(long freq) {
+		super(freq);
 	}
 
 	/**
@@ -72,8 +35,6 @@ public class UARTProtocol extends Protocol{
 	 */
 	@Override
 	public void decode(double startTime) {
-		loadFromProperties();
-
         if(DEBUG) {
             PrintDebug.printInfo("UART Protocol decode");
             PrintDebug.printInfo("Data length: "    + logicData.length());
@@ -124,7 +85,7 @@ public class UARTProtocol extends Protocol{
 				}
 				
 				// Parity bit
-				if(mParity != Parity.NoParity){
+				if(parity != Parity.NoParity){
 					n += samplesPerBit;
 					parityBit = logicData.get(n);
 				}
@@ -147,7 +108,7 @@ public class UARTProtocol extends Protocol{
 							(tempIndex+samplesPerBit+(samplesPerBit*dataBits)*sampleTime), startTime);
 					
 					// Parity bit
-					if(mParity != Parity.NoParity){
+					if(parity != Parity.NoParity){
 						if(checkParity(dataByte, parityBit))
 							addString("[P]", (n-halfBit)*sampleTime, (n+halfBit)*sampleTime, startTime);
 						else
@@ -189,16 +150,16 @@ public class UARTProtocol extends Protocol{
 		for(int n = 0; n < 9; ++n){
 			if(LogicHelper.bitTest(data, n)) ++counter;
 		}
-		
+
 		// Numero IMPAR de '1', paridad par y el bit de paridad es 1
-		if(counter % 2 != 0 && mParity == Parity.Even && parityBit) return true;
+		if(counter % 2 != 0 && parity == Parity.Even && parityBit) return true;
 		// Numero PAR de '1', paridad par y el bit de paridad es 0
-		if(counter % 2 == 0 && mParity == Parity.Even && !parityBit) return true;
+		if(counter % 2 == 0 && parity == Parity.Even && !parityBit) return true;
 		
 		// Numero IMPAR de '1', paridad impar y el bit de paridad es 0 
-		if(counter % 2 != 0 && mParity == Parity.Odd && !parityBit) return true;
+		if(counter % 2 != 0 && parity == Parity.Odd && !parityBit) return true;
 		// Numero PAR de '1', paridad impar y el bit de paridad es 1 
-		if(counter % 2 == 0 && mParity == Parity.Odd && parityBit) return true;
+		if(counter % 2 == 0 && parity == Parity.Odd && parityBit) return true;
 		
 		return false;
 	}
@@ -224,7 +185,7 @@ public class UARTProtocol extends Protocol{
 	 */
 	public void set9BitsMode (boolean state){
 		is9Bits = state;
-		if(state) mParity = Parity.NoParity;
+		if(state) parity = Parity.NoParity;
 	}
 	
 	public boolean is9BitsMode (){
@@ -236,16 +197,13 @@ public class UARTProtocol extends Protocol{
 	 * @param mParity {@link com.protocolanalyzer.api.UARTProtocol.Parity} enum
 	 */
 	public void setParity (Parity mParity){
-		this.mParity = mParity;
+		this.parity = mParity;
 	}
 	
 	public Parity getParity (){
-		return mParity;
+		return parity;
 	}
-	
-	/**
-	 * Set whether to use two stop bits instead of one
-	 */
+
 	public void setTwoStopBits (boolean twoStopBits){
 		this.twoStopBits = twoStopBits;
 	}
@@ -254,7 +212,7 @@ public class UARTProtocol extends Protocol{
 		return twoStopBits;
 	}
 
-	@Override
+    @Override
 	public boolean hasClock() {
 		return false;
 	}

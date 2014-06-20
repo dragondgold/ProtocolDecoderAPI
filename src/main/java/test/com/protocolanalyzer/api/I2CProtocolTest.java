@@ -28,8 +28,8 @@ public class I2CProtocolTest extends AbstractBenchmark {
         System.out.println("*              I2C PROTOCOL              *");
         System.out.println("******************************************");
 
-        channelI2C = new I2CProtocol(400000, null, 0);
-        clockI2C = new Clock(400000, null, 0);
+        channelI2C = new I2CProtocol(400000);
+        clockI2C = new Clock(400000);
 
         System.out.println("Parsing...");
         //								  S		  Address        A 		  Byte		  A  	   Byte       A   ST

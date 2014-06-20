@@ -5,7 +5,6 @@ import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.protocolanalyzer.api.LogicBitSet;
 import com.protocolanalyzer.api.LogicHelper;
 import com.protocolanalyzer.api.UARTProtocol;
-import com.protocolanalyzer.api.utils.Configuration;
 import org.junit.*;
 
 /** 
@@ -27,13 +26,12 @@ public class UARTProtocolTest extends AbstractBenchmark {
         System.out.println("*             UART PROTOCOL              *");
         System.out.println("******************************************");
 
-        Configuration config = new Configuration();
-        config.setProperty("BaudRate0", 9600);
-        config.setProperty("nineData0", false);
-        config.setProperty("dualStop0", false);
-        config.setProperty("Parity0", UARTProtocol.Parity.NoParity.ordinal());
+        channelUART = new UARTProtocol(200000);
 
-        channelUART = new UARTProtocol(200000, config, 0);
+        channelUART.setBaudRate(9600);
+        channelUART.set9BitsMode(false);
+        channelUART.setTwoStopBits(false);
+        channelUART.setParity(UARTProtocol.Parity.NoParity);
 
         System.out.println("Parsing");
 

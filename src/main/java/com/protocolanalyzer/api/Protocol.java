@@ -3,15 +3,13 @@ package com.protocolanalyzer.api;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.protocolanalyzer.api.utils.Configuration;
-
 public abstract class Protocol {
 
     /**
      * Protocol types
      */
 	public enum ProtocolType {
-		I2C(1), UART(2), CLOCK(3), NONE(-1);
+		I2C(1), UART(2), CLOCK(3), SPI(4), NONE(-1);
 		
 		private final int value;
 		private ProtocolType(int value){
@@ -30,10 +28,6 @@ public abstract class Protocol {
 	protected LogicBitSet logicData = new LogicBitSet();
 	/** Sample rate */
 	protected long sampleFrec = 0;
-	/** Settings */
-	protected Configuration mProperties;
-	/** ID */
-	protected final int mID;
 	
 	/**
 	 * Decode data in {@link com.protocolanalyzer.api.Protocol#logicData}
@@ -52,32 +46,12 @@ public abstract class Protocol {
 	 * @return true if it needs clock source, false otherwise
 	 */
 	public abstract boolean hasClock();
-	
-	/**
-	 * Channel settings
-	 * @param prop {@link com.protocolanalyzer.api.utils.Configuration} object
-	 */
-	public abstract void setProperties (Configuration prop);
-	
-	/**
-	 * Force settings update
-	 * @return true if settings were updated, false if error or settings don't exists
-	 */
-	public abstract boolean invalidateProperties();
-	
-	public Configuration getProperties (){
-		return mProperties;
-	}
 
     /**
      * @param freq sample frequency
-     * @param prop {@link com.protocolanalyzer.api.utils.Configuration} object containing channel settings
-     * @param id channel id
      */
-	public Protocol (long freq, Configuration prop, int id){
+	public Protocol (long freq){
 		sampleFrec = freq;
-		mProperties = prop;
-		mID = id;
 	}
 	
 	/**

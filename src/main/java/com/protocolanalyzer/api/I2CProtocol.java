@@ -1,6 +1,5 @@
 package com.protocolanalyzer.api;
 
-import com.protocolanalyzer.api.utils.Configuration;
 import com.protocolanalyzer.api.utils.PrintDebug;
 
 public class I2CProtocol extends Protocol{
@@ -10,22 +9,9 @@ public class I2CProtocol extends Protocol{
 
     /**
      * @param freq sample frequency in Hz
-     * @param prop {@link com.protocolanalyzer.api.utils.Configuration} object containing channel settings
-     * @param id channel id
      */
-	public I2CProtocol(long freq, Configuration prop, int id) {
-		super(freq, prop, id);
-	}
-
-	@Override
-	public void setProperties (Configuration prop){
-		mProperties = prop;
-		invalidateProperties();
-	}
-	
-	@Override
-	public boolean invalidateProperties (){
-		return false;
+	public I2CProtocol(long freq) {
+		super(freq);
 	}
 	
 	/**

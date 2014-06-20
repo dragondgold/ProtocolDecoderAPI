@@ -1,11 +1,9 @@
 package com.protocolanalyzer.api;
 
-import com.protocolanalyzer.api.utils.Configuration;
-
 public class Clock extends Protocol{
 
-	public Clock(long freq, Configuration prop, int id) {
-		super(freq, prop, id);
+	public Clock(long freq) {
+		super(freq);
 	}
 
 	@Override
@@ -17,17 +15,6 @@ public class Clock extends Protocol{
 		return ProtocolType.CLOCK;
 	}
 
-	@Override
-	public void setProperties (Configuration prop){
-		mProperties = prop;
-		invalidateProperties();
-	}
-	
-	@Override
-	public boolean invalidateProperties (){
-		return false;
-	}
-	
 	/**
 	 * Gets clock frequency base on the sample rate
 	 * @return clock frequency, -1 if was not possible to calculate it
