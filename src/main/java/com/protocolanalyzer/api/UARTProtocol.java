@@ -1,6 +1,7 @@
 package com.protocolanalyzer.api;
 
 import com.protocolanalyzer.api.utils.Configuration;
+import com.protocolanalyzer.api.utils.PrintDebug;
 
 public class UARTProtocol extends Protocol{
 
@@ -15,25 +16,25 @@ public class UARTProtocol extends Protocol{
 	private Parity mParity = Parity.NoParity;
 	
 	/**
-	 * Propiedades que deben existir en el objeto Properties pasado:
-	 * "BaudRate" + id	-> Baudios (int)
-	 * "nineData" + id	-> Dato de 9 bits (boolean)
-	 * "dualStop" + id	-> Indica si hay o no dos bits de stop (boolean)
-	 * "Parity"   + id  -> Sin paridad, paridad even, paridad odd dependiendo del numero ordinal del enum (int) 
-	 * (Parity.Even.ordinal())
-	 * @param freq
-	 * @param prop
-	 * @param id
+	 * Properties that must exists in the {@link com.protocolanalyzer.api.utils.Configuration} object passed.
+     *
+     * <pre>
+     * {@code
+	 * "BaudRate" + id  -> Bauds (int)
+	 * "nineData" + id  -> Is 9 bits data? (boolean)
+	 * "dualStop" + id  -> Is two stop bits? (boolean)
+	 * "Parity"   + id  -> Parity as defined in Enum (int) ( ie: Parity.Even.ordinal() )
+     * }
+     * </pre>
+	 * @param freq sample frequency in Hz
+	 * @param prop {@link com.protocolanalyzer.api.utils.Configuration} object containing channel settings
+	 * @param id channel id
 	 */
 	public UARTProtocol(long freq, Configuration prop, int id) {
 		super(freq, prop, id);
 		loadFromProperties();
 	}
-	
-	/**
-	 * Define las propiedades del canal
-	 * @param prop
-	 */
+
 	@Override
 	public void setProperties (Configuration prop){
 		mProperties = prop;
@@ -58,90 +59,94 @@ public class UARTProtocol extends Protocol{
 	}
 
 	/**
-	 * Decodifica el LogicBitSet (grupo de bits) que contiene el canal segun protocolo UART
-	 * @param startTime, offset del tiempo que se desea agregar
-	 * @return LogicData que contiene Strings con los datos decodificados siendo:
-	 * 			[S] -> bit de Start
-	 * 			numero -> valor de los 8 bits
-	 * 			[SP] -> bit de Stop
-	 * 				[SP1] -> bit de Stop 1
-	 * 				[SP2] -> bit de Stop 2
-	 * 			[P]	-> Paridad existe y es correcta
-	 * 				[P*] -> Paridad existe y no coincide con la cantidad de unos
-	 * @see http://stackoverflow.com/questions/2978569/android-java-append-string-int (para StringBuilder)
-	 * @see http://www.dosideas.com/noticias/java/339-string-vs-stringbuffer-vs-stringbuilder.html (datos sobre StringBuilder y StringBuffer)
+	 * Decode data with UART protocol.
+     * The Strings decoded from the {@link com.protocolanalyzer.api.LogicBitSet} are:
+     *      [S]         -> Start bit
+     * 		[number]    -> 8 bits data
+     * 		[SP]        -> Stop data
+     * 		[SP1]       -> Stop bit 1
+     * 		[SP2]       -> Stop bit 2
+     * 		[P]	        -> Parity bit, parity correct
+     *		[P*]        -> Parity bit, parity incorrect
+	 * @param startTime, time offset to be added in seconds
 	 */
 	@Override
 	public void decode(double startTime) {
 		loadFromProperties();
-			
-		if(DEBUG) System.out.println("UARTDecode - UART Protocol decode");
-		if(DEBUG) System.out.println("UARTDecode - Source lenght: " + logicData.length());
-		if(DEBUG) System.out.println("UARTDecode - Dart: " 			+ logicData.toString());
+
+        if(DEBUG) {
+            PrintDebug.printInfo("UART Protocol decode");
+            PrintDebug.printInfo("Data length: "    + logicData.length());
+            PrintDebug.printInfo("Data: "           + logicData.toString());
+        }
 		
-		int n = 0;				// Index
-		int tempIndex;			// Index para guardado temporal
+		int n = 0;
+		int tempIndex;
 		boolean parityBit = false;
 		final int dataBits;
-		final double sampleTime = 1.0d/sampleFrec;					// Cuanto tiempo demora cada muestreo
+		final double sampleTime = 1.0d/sampleFrec;					// Time between each sample
 		final int samplesPerBit = (int)Math.ceil((1.0d/baudRate) / sampleTime);
-		final int halfBit = (int)Math.ceil(samplesPerBit/2.0);		// Tiempo hasta la mitad del bit
+		final int halfBit = (int)Math.ceil(samplesPerBit/2.0);		// Time to the middle of the bit
 		
 		if(is9Bits) dataBits = 9;
 		else dataBits = 8;
 		
-		if(DEBUG) System.out.println("UARTDecode - samplesPerBit: " + samplesPerBit);
-		if(DEBUG) System.out.println("UARTDecode - halfBit: " + halfBit);
+		if(DEBUG) PrintDebug.printInfo("samplesPerBit: "    + samplesPerBit);
+		if(DEBUG) PrintDebug.printInfo("halfBit: "          + halfBit);
 		
-		// Comprueba que halla al menos 3 samples por cada bit para asegura un buen muestreo
-		if( ((1.0d/baudRate) / sampleTime) < 3.0d) return;
-		
-		// Si llege al final del array de datos salgo del bucle (el (samplesPerBit*10 es porque necesito
-		// al menos 10 bits para la trama del UART, si hay menos esta incompleta)
+		// Test if we have at least 3 samples per bit
+		if( ((1.0d/baudRate) / sampleTime) < 3.0d){
+            PrintDebug.printWarning("Low sample rate! Data decoding may not be correct");
+        }
+
+        // We need at least 10 bits for a complete UART transmission (samplesPerBit*10). Keep going while we have this
+        //  10 bits available
 		while(n <= (logicData.length()-(samplesPerBit*10))){
-			n = logicData.nextFallingEdge(n); if(n == -1) break;		// Busco un flanco de bajada (Start)
+			n = logicData.nextFallingEdge(n); if(n == -1) break;		// Search for falling edge (Start)
 			
-			if(DEBUG) System.out.println("UARTDecode - n Falling Edge: " + n);
+			if(DEBUG) PrintDebug.printInfo("Falling edge index: " + n);
 			
-			// Voy a la mitad del bit de Start para verificar si es 0
+			// Go to middle of the start bit to test it
 			n += halfBit;
-			if(DEBUG) System.out.println("UARTDecode - n Start: " + n);
-			if(logicData.get(n) == false){ 		// Si el siguiente bit es 0 entonces es el bit de Start
-				tempIndex = n - halfBit;		// Lugar de inicio del bit de Start
-				if(DEBUG) System.out.println("UARTDecode - n de inicio de byte: " + n);
+			if(DEBUG) PrintDebug.printInfo("Start index: " + n);
+
+            // If the next bit is 0 then it's the start bit
+			if(!logicData.get(n)){
+                // Start bit starting time
+				tempIndex = n - halfBit;
+				if(DEBUG) PrintDebug.printInfo("Start index of byte: " + n);
 				int dataByte = 0;
 				
-				// Empiezo leyendo desde el LSB y lo voy colocando en el byte
-				for(int bit = 0; bit < dataBits; ++bit){		// Voy tomando los bits y armo el byte del dato
+				// Start reading from the LSB
+				for(int bit = 0; bit < dataBits; ++bit){
 					n += samplesPerBit;
 					dataByte = LogicHelper.bitSet(dataByte, logicData.get(n), (dataBits-1) - bit);
 				}
 				
-				// Si hay bit de paridad
+				// Parity bit
 				if(mParity != Parity.NoParity){
 					n += samplesPerBit;
 					parityBit = logicData.get(n);
 				}
 				
-				if(DEBUG) System.out.println("UARTDecode - dataByte: " + Integer.toBinaryString(dataByte) + " - dataByte: " + dataByte);
+				if(DEBUG) PrintDebug.printInfo("dataByte: " + Integer.toBinaryString(dataByte) + " - dataByte: " + dataByte);
 				n += samplesPerBit;
-				
-				// Si a continuación tengo el/los bit de stop entonces escribo en el String los datos
-				// Sino es simplemente un error y no escribo nada
-				if(logicData.get(n) == true){
+
+                // Check if the next bit is the stop bit, otherwise this all is an error, skip it!
+				if(logicData.get(n)){
 					// Si tengo dos bits de stop compruebo que a continuación este el segundo bit
 					if(twoStopBits){
 						if(!logicData.get(n + samplesPerBit)) continue;
 					}
-					if(DEBUG) System.out.println("UARTDecode - n stopBit: " + n);
-					// Bit de Start
+					if(DEBUG) PrintDebug.printInfo("stopBit index: " + n);
+					// Start bit
 					addString("[S]", tempIndex*sampleTime, (tempIndex+samplesPerBit)*sampleTime, startTime);
 					
-					// Dato
+					// Data
 					addString(""+dataByte, (tempIndex+samplesPerBit)*sampleTime,
 							(tempIndex+samplesPerBit+(samplesPerBit*dataBits)*sampleTime), startTime);
 					
-					// Bit de paridad
+					// Parity bit
 					if(mParity != Parity.NoParity){
 						if(checkParity(dataByte, parityBit))
 							addString("[P]", (n-halfBit)*sampleTime, (n+halfBit)*sampleTime, startTime);
@@ -149,7 +154,7 @@ public class UARTProtocol extends Protocol{
 							addString("[P*]", (n-halfBit)*sampleTime, (n+halfBit)*sampleTime, startTime);
 					}
 					
-					// Bit(s) de Stop
+					// Stop bit(s)
 					if(!twoStopBits) addString("[SP]", (n-halfBit)*sampleTime, (n+halfBit)*sampleTime, startTime);
 					else{
 						// Bits de stop
@@ -161,11 +166,10 @@ public class UARTProtocol extends Protocol{
 				}
 				n -= halfBit;
 			}
-			if(DEBUG) System.out.println("UARTDecode - n before while: " + n);
-			if(DEBUG) System.out.println("UARTDecode - Condition: " + (logicData.length()-(samplesPerBit*10.0)) );
+			if(DEBUG) PrintDebug.printInfo("n before while: " + n);
 		}
-		if(DEBUG) System.out.println("UARTDecode - Exit while()");
-		if(DEBUG) System.out.println("UARTDecode - String size: " + mDecodedData.size());
+		if(DEBUG) PrintDebug.printInfo("Exit while()");
+		if(DEBUG) PrintDebug.printInfo("Decoded data size: " + mDecodedData.size());
 	}
 
 	@Override
@@ -174,10 +178,11 @@ public class UARTProtocol extends Protocol{
 	}
 	
 	/**
-	 * Comprueba que la paridad coincida con la cantida de '1' en el dato
-	 * @param data	dato a comprobar
-	 * @param parityBit bit de paridad a comprobar
-	 * @return true si la paridad es correcta, false de otro modo
+     * Test if parity matches '1' quantity
+     *
+	 * @param data data to check
+	 * @param parityBit parity bit
+	 * @return true if parity matches, false otherwise
 	 */
 	private boolean checkParity (int data, boolean parityBit){
 		int counter = 0;
@@ -199,7 +204,7 @@ public class UARTProtocol extends Protocol{
 	}
 	
 	/**
-	 * Define la velocidad en baudios del UART
+	 * Sets UART baud rate
 	 * @param baud
 	 */
 	public void setBaudRate (int baud){
@@ -207,16 +212,15 @@ public class UARTProtocol extends Protocol{
 	}
 	
 	/**
-	 * Obtiene la velocidad en baudios del UART. Por defecto 9600 baudios.
-	 * @return
+	 * Get UART baud rate
+	 * @return UART baud rate. Default 9600.
 	 */
 	public int getBaudRate() {
 		return baudRate;
 	}
 	
 	/**
-	 * Define si se transmite con el modo de 9 bits o no
-	 * @param state
+	 * Sets 9 bit transmission mode
 	 */
 	public void set9BitsMode (boolean state){
 		is9Bits = state;
@@ -228,8 +232,8 @@ public class UARTProtocol extends Protocol{
 	}
 	
 	/**
-	 * Setea la paridad siendo posible UARTProtocol.Even, UARTProtocol.Odd o UARTProtocol.NoParity
-	 * @param mParity
+	 * Set UART parity
+	 * @param mParity {@link com.protocolanalyzer.api.UARTProtocol.Parity} enum
 	 */
 	public void setParity (Parity mParity){
 		this.mParity = mParity;
@@ -240,8 +244,7 @@ public class UARTProtocol extends Protocol{
 	}
 	
 	/**
-	 * Determina si se usan dos bits de stop o solo uno
-	 * @param twoStopBits
+	 * Set whether to use two stop bits instead of one
 	 */
 	public void setTwoStopBits (boolean twoStopBits){
 		this.twoStopBits = twoStopBits;

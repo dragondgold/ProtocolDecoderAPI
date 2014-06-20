@@ -7,11 +7,7 @@ public class EmptyProtocol extends Protocol{
 	public EmptyProtocol(long freq, Configuration prop, int id) {
 		super(freq, prop, id);
 	}
-	
-	/**
-	 * Define las propiedades del canal
-	 * @param prop
-	 */
+
 	@Override
 	public void setProperties (Configuration prop){
 		mProperties = prop;

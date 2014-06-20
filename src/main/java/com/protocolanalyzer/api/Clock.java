@@ -16,11 +16,7 @@ public class Clock extends Protocol{
 	public ProtocolType getProtocol() {
 		return ProtocolType.CLOCK;
 	}
-	
-	/**
-	 * Define las propiedades del canal
-	 * @param prop
-	 */
+
 	@Override
 	public void setProperties (Configuration prop){
 		mProperties = prop;
@@ -33,12 +29,10 @@ public class Clock extends Protocol{
 	}
 	
 	/**
-	 * Obtiene la frecuencia de clock en Hz calculada en base al tiempo de muestreo.
-	 * @return frecuencia del clock; -1 si no se pudo calcular.
+	 * Gets clock frequency base on the sample rate
+	 * @return clock frequency, -1 if was not possible to calculate it
 	 */
 	public int getCalculatedFrequency (){
-		// Resto entre dos flancos de subida (que me asegure antes que hubiera)
-		// para calcular la frecuencia del clock
 		int firstEdge, secondEdge;
 		
 		firstEdge = logicData.nextRisingEdge(0);
@@ -52,12 +46,10 @@ public class Clock extends Protocol{
 	}
 	
 	/**
-	 * Obtiene la tolerancia que tiene la frecuencia calculada debido a la frecuencia de muestreo
-	 * @return
+	 * Get calculated frequency tolerance due to sample rate time
+	 * @return deviation from the real frequency in +-x Hz
 	 */
 	public float getFrequencyTolerance (){
-		// Resto entre dos flancos de subida (que me asegure antes que hubiera)
-		// para calcular la frecuencia del clock
 		int firstEdge, secondEdge;
 		double firstEdgeTime, secondEdgeTime;
 		
@@ -66,12 +58,13 @@ public class Clock extends Protocol{
 		else return -1;
 		
 		if(secondEdge != -1){
-			// Convierto los edges en tiempo y le sumo a uno un tiempo de muestreo (tolerancia)
+            // Convert indexes to time and add one sample time (tolerance)
 			firstEdgeTime = firstEdge * 1.0d/sampleFrec;
 			secondEdgeTime = secondEdge * 1.0d/sampleFrec;
 			secondEdgeTime += 1.0d/sampleFrec;
-			
-			// Resto entre la frecuencia calculada y a la que le sume el tiempo para obtener la tolerancia
+
+            // Get the difference between calculated frequency and the one where we added a sample time
+            //  to obtain the tolerance
 			return (float)(getCalculatedFrequency() - (1.0d/(secondEdgeTime - firstEdgeTime)));
 		}
 		else return -1;

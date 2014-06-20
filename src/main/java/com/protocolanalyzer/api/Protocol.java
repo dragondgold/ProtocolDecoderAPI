@@ -6,11 +6,10 @@ import java.util.List;
 import com.protocolanalyzer.api.utils.Configuration;
 
 public abstract class Protocol {
-	
-	/**
-	 * Enumeracion con los tipos de protocolo
-	 * @author andres
-	 */
+
+    /**
+     * Protocol types
+     */
 	public enum ProtocolType {
 		I2C(1), UART(2), CLOCK(3), NONE(-1);
 		
@@ -23,55 +22,58 @@ public abstract class Protocol {
 			return value;
 		}
 	}
-	
-	/** Contiene un String con las posiciones iniciales y finales del mismo en el tiempo */
+
+    /** Decoded data containing a list of {@link com.protocolanalyzer.api.TimePosition} containing a String with an start
+     *   and end time */
 	protected List<TimePosition> mDecodedData = new ArrayList<TimePosition>();
-	/** Bits para ser decodificados */
+	/** Bits to be decoded */
 	protected LogicBitSet logicData = new LogicBitSet();
-	/** Velocidad de muestreo con la que se tomo el canal */
+	/** Sample rate */
 	protected long sampleFrec = 0;
-	/** Propiedades del canal */
+	/** Settings */
 	protected Configuration mProperties;
-	/** Identificacion del canal usada para la carga de las propiedades */
+	/** ID */
 	protected final int mID;
 	
 	/**
-	 * Implementacion independiente de la decodificación del protocolo
-	 * @param startTime
+	 * Decode data in {@link com.protocolanalyzer.api.Protocol#logicData}
+	 * @param startTime offset of start time
 	 */
 	public abstract void decode(double startTime);
 
 	/**
-	 * Debe retornar el tipo de protocolo que se crea
-	 * @return
+	 * Protocol type
+	 * @return {@link com.protocolanalyzer.api.Protocol.ProtocolType} enum
 	 */
 	public abstract ProtocolType getProtocol();
 	
 	/**
-	 * Indica si el protocolo requiere o no de una fuente de clock
-	 * @return
+	 * Whether or not protocol needs a clock source
+	 * @return true if it needs clock source, false otherwise
 	 */
 	public abstract boolean hasClock();
 	
 	/**
-	 * Define las propiedades del canal
-	 * @param prop
+	 * Channel settings
+	 * @param prop {@link com.protocolanalyzer.api.utils.Configuration} object
 	 */
 	public abstract void setProperties (Configuration prop);
 	
 	/**
-	 * Fuerza la actualizacion de las propiedades
-	 * @return true si se actualizan las propiedades, false si hay un error o no existe el objeto
+	 * Force settings update
+	 * @return true if settings were updated, false if error or settings don't exists
 	 */
 	public abstract boolean invalidateProperties();
 	
 	public Configuration getProperties (){
 		return mProperties;
 	}
-	
-	/**
-	 * @param freq, frecuencia de muestreo
-	 */
+
+    /**
+     * @param freq sample frequency
+     * @param prop {@link com.protocolanalyzer.api.utils.Configuration} object containing channel settings
+     * @param id channel id
+     */
 	public Protocol (long freq, Configuration prop, int id){
 		sampleFrec = freq;
 		mProperties = prop;
@@ -79,52 +81,39 @@ public abstract class Protocol {
 	}
 	
 	/**
-	 * Obtiene el LogicBitSet que contiene los bits del canal
-	 * @return
+	 * Get {@link com.protocolanalyzer.api.LogicBitSet} containing the bits to be decoded
+	 * @return {@link com.protocolanalyzer.api.LogicBitSet} containing the bits to be decoded
 	 */
 	public LogicBitSet getChannelBitsData (){
 		return logicData;
 	}
-	
-	/**
-	 * Reemplaza los bits existentes del canal con los pasados
-	 * @param data
-	 */
+
 	public void setChannelBitsData (LogicBitSet data){
 		logicData = data;
 	}
-	
-	/**
-	 * Obtiene la lista con los Strings del protocolo decodificado con sus correspondientes
-	 * posiciones en el tiempo en mili-segundos
-	 * @return
-	 */
+
 	public List<TimePosition> getDecodedData() {
 		return mDecodedData;
 	}
-	
-	/**
-	 * Frecuencia de muestreo que se utilizo
-	 * @param freq
-	 */
+
 	public void setSampleFrequency (long freq){
 		sampleFrec = freq;
 	}
-	
-	/**
-	 * Frecuencia de muestreo que se utilizo
-	 * @return
-	 */
+
 	public long getSampleFrequency(){
 		return sampleFrec;
 	}
-	
+
+    /**
+     * Gets the number of bits to be decoded
+     * @return number of bits to be decoded
+     */
 	public int getBitsNumber(){
 		return logicData.length();
 	}
 	
 	/**
-	 * Elimina los datos de decodificación y los bits
+	 * Clear decoded data and bits to be decoded
 	 */
 	public void reset(){
 		mDecodedData.clear();
@@ -132,11 +121,11 @@ public abstract class Protocol {
 	}
 	
 	/**
-	 * Agrega un String en la posicion dada sumando el tiempo de inicio initTime en mS
-	 * @param text String a agregar
-	 * @param startTime tiempo de inicio en segundos
-	 * @param stopTime tiempo final en segundos
-	 * @param initTime offset de tiempo a agregar en segundos
+     * Adds a String in the given position adding init time as offset in seconds
+	 * @param text {@link java.lang.String} to add
+	 * @param startTime start time in seconds
+	 * @param stopTime end time in seconds
+	 * @param initTime time offset in seconds
 	 */
 	public void addString (String text, double startTime, double stopTime, double initTime){
 		if(stopTime >= startTime){
