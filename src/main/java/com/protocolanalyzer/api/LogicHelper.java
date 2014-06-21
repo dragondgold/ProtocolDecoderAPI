@@ -7,48 +7,46 @@ public class LogicHelper {
 	private static final boolean DEBUG = true;
                 
 	/**
-	 * Testea un bit dentro de un byte
-	 * @author Andres Torti
-	 * @param a byte para testear
-	 * @param bit numero de bit a testear 0-7
-	 * @see http://en.wikipedia.org/wiki/Mask_(computing) (Mask bits)
+	 * Test bit inside a byte
+	 * @param a byte to test
+	 * @param bit bit number to test from 0 to 7
+	 * @see <a href="http://en.wikipedia.org/wiki/Mask_(computing)">Wikipedia bit masking</a>
 	 */
 	public static boolean bitTest (byte a, int bit) {
 		return (a & (1 << bit)) != 0;
 	}
 	
 	/**
-	 * Testea un bit dentro de un byte
-	 * @author Andres Torti
-	 * @param a int para testear
-	 * @param bit numero de bit a testear 0-31
-	 * @see http://en.wikipedia.org/wiki/Mask_(computing) (Mask bits)
+	 * Test bit inside 32 bit integer
+	 * @param a 32 bit integer to test
+	 * @param bit bit number to test from 0 to 31
+     * @see <a href="http://en.wikipedia.org/wiki/Mask_(computing)">Wikipedia bit masking</a>
 	 */
 	public static boolean bitTest (int a, int bit) {
 		return (a & (1 << bit)) != 0;
 	}
 	
 	/**
-	 * Setea un bit dentro de un byte al estado dado
-	 * @param a byte el cual modificar
-	 * @param state true o false
-	 * @param bit numero del bit a modificar (0 a 7)
-	 * @return byte modificado
-	 * @see http://en.wikipedia.org/wiki/Mask_(computing) (Mask bits)
+	 * Set bit inside a byte to the given state
+	 * @param a byte to modify
+	 * @param state true or false
+	 * @param bit bit number to modify from 0 to 7
+	 * @return modified byte
+     * @see <a href="http://en.wikipedia.org/wiki/Mask_(computing)">Wikipedia bit masking</a>
 	 */
 	public static byte bitSet (byte a, boolean state, int bit){
 		if(bit < 0) return a;
-		if(state == true) return (byte)(a | (1 << bit));
+		if(state) return (byte)(a | (1 << bit));
 		else return (byte)(a & ~(1 << bit));
 	}
 	
 	/**
-	 * Setea un bit dentro de un byte al estado dado
-	 * @param a byte el cual modificar
-	 * @param state true o false
-	 * @param bit numero del bit a modificar (0 a 7)
-	 * @return byte modificado
-	 * @see http://en.wikipedia.org/wiki/Mask_(computing) (Mask bits)
+	 * Set bit inside a 32 bit integer to the given state
+	 * @param a 32 bit integer to modify
+	 * @param state true or false
+	 * @param bit bit number to modify from 0 to 31
+	 * @return modified 32 bit integer
+     * @see <a href="http://en.wikipedia.org/wiki/Mask_(computing)">Wikipedia bit masking</a>
 	 */
 	public static int bitSet (int a, boolean state, int bit){
 		if(bit < 0) return a;
@@ -57,12 +55,11 @@ public class LogicHelper {
 	}
 	
 	/**
-	 * Parseador de bits, se la pasa un String con los 1 y 0 que se desean y los coloca en un LogicBitSet
-	 * con el numero de muestreos por bit que se deseen
-	 * @param data String con los 1 y 0, los demas caracteres son ignorados
-	 * @param samplesPerBit numero de bits por cada 1 y 0
-	 * @param times indica la cantidad de veces que se repite el String pasado para crear cadenas mas largas
-	 * @return LogicBitSet con los bits de acuerdo al String y los samplesPerBit
+     * Bit parser which generates '1' and '0' according to the passed String
+	 * @param data String with '1' and '0' characters, other characters are ignored
+	 * @param samplesPerBit number of bits for each '1' or '0'
+	 * @param times how many times to repeat the given sequence. This used to create larger sequences
+	 * @return {@link com.protocolanalyzer.api.LogicBitSet} containing the bits
 	 */
 	public static LogicBitSet bitParser (final String data, final int samplesPerBit, final int times){
 		LogicBitSet bitSet = new LogicBitSet();
@@ -92,10 +89,10 @@ public class LogicHelper {
 	}
 	
 	/**
-	 * Convierte dos bytes a un int
+	 * Converts two bytes to a 16 bit integer
 	 * @param LSB LSB byte
 	 * @param MSB MSB byte
-	 * @return int con los 16 bits
+	 * @return integer
 	 */
 	public static int byteToInt (final byte LSB, final byte MSB){
 		int temp = 0;
@@ -106,17 +103,17 @@ public class LogicHelper {
 	}
 	
 	/**
-	 * Decodifica el algoritmo de compresión Run Lenght
-	 * @param data ByteArrayBuffer con los bytes comprimidos
-	 * @return array de byte[] con los datos descomprimidos
+	 * Decodes the Run Length Algorithm
+	 * @param data {@link com.protocolanalyzer.api.utils.ByteArrayBuffer} with the compressed data
+	 * @return byte[] array containing the decompressed data
 	 */
-	public static byte[] runLenghtDecode (final ByteArrayBuffer data){
+	public static byte[] runLengthDecode(final ByteArrayBuffer data){
 		
-		int lenght = data.length();
+		int length = data.length();
 		int repeat;
 		ByteArrayBuffer returnData = new ByteArrayBuffer(data.length());
 		
-		for(int n = 0; n < lenght; n += 3){
+		for(int n = 0; n < length; n += 3){
 			repeat = LogicHelper.byteToInt((byte)data.byteAt(n), (byte)data.byteAt(n+1));
 			for(int k = 0; k < repeat; ++k){
 				returnData.append(data.byteAt(n+2));
@@ -127,24 +124,22 @@ public class LogicHelper {
 	}
 	
 	/**
-	 * Pasa un buffer de bytes a los buffers individuales de cada canal
-	 * @author Andres
-	 * @param data es un array de bytes con los bytes que se reciben del analizador logico, siendo el bit 0 el estado
-	 * del canal 0 hasta el bit 8 el estado del canal 8
+     * Copy a byte buffer to each {@link com.protocolanalyzer.api.Protocol}
+	 * @param data byte[] array containing the data from each channel being bit 0 the data from channel 0
+     *             to bit 7 the data from channel 7
 	 */
 	 public static void bufferToChannel (final byte[] data, Protocol[] list) {
 		
 		if(DEBUG) System.out.println("LogicHelper - Lenght data array: " + data.length);
+
+         for (Protocol aList : list) aList.getChannelBitsData().clear();
 		
-		// Borro los bits anteriores porq ya no me hacen falta
-		for(int n=0; n < list.length; ++n) list[n].getChannelBitsData().clear();
-		
-		for(int n=0; n < data.length; ++n){						// Voy a traves de los bytes recibidos
-			for(int bit=0; bit < list.length; ++bit){			// Voy a traves de cada canal (cada bit del byte)
-				if(LogicHelper.bitTest(data[n], bit)){			// Si es 1
-					list[bit].getChannelBitsData().set(n);		// bit es el numero del canal y el bit a poner a 1 o 0
+		for(int n=0; n < data.length; ++n){						// Go through received bytes
+			for(int bit=0; bit < list.length; ++bit){			// Go through each channel
+				if(LogicHelper.bitTest(data[n], bit)){			// Bit is 1
+					list[bit].getChannelBitsData().set(n);		// bit is the channel number
 				}
-				else{											// Si es 0
+				else{											// Bit is 0
 					list[bit].getChannelBitsData().clear(n);
 				}
 			}
@@ -152,28 +147,45 @@ public class LogicHelper {
 	}
 	 
 	/**
-	 * Agrega un buffer de bytes a los buffers individuales de cada canal
-	 * @author Andres
-	 * @param data es un array de bytes con los bytes que se reciben del analizador logico, siendo el bit 0 el estado
-	 * del canal 0 hasta el bit 8 el estado del canal 8
+	 * Adds a byte buffer to each {@link com.protocolanalyzer.api.Protocol}
+	 * @param data byte[] array containing the data from each channel being bit 0 the data from channel 0
+     *             to bit 7 the data from channel 7
 	 */
 	 public static void addBufferToChannel (final byte[] data, Protocol[] list) {
 		
 		if(DEBUG) System.out.println("LogicHelper - Lenght data array: " + data.length);
 		if(DEBUG) System.out.println("LogicHelper - Lenght BitSet: " + list[0].getChannelBitsData().length());
-		int initialLenght = list[0].getBitsNumber()+1;
-		
-		// Agrego los bits a los ganales
-		for(int n=initialLenght; n < (initialLenght+data.length); ++n){		// Voy a traves de los bytes recibidos
-			for(int bit=0; bit < list.length; ++bit){			// Voy a traves de cada canal (cada bit del byte)
-				if(LogicHelper.bitTest(data[n], bit)){			// Si es 1
-					list[bit].getChannelBitsData().set(n);		// bit es el numero del canal y el bit a poner a 1 o 0
+		int initialLength = list[0].getBitsNumber()+1;
+
+		for(int n=initialLength; n < (initialLength+data.length); ++n){		// Go through received bytes
+			for(int bit=0; bit < list.length; ++bit){			            // Go through each channel
+				if(LogicHelper.bitTest(data[n], bit)){			            // Bit is 1
+					list[bit].getChannelBitsData().set(n);		            // bit is the channel number
 				}
-				else{											// Si es 0
+				else{											            // Bit is 0
 					list[bit].getChannelBitsData().clear(n);
 				}
 			}
 		}
 	}
-	
+
+    /**
+     * Reverse the bits in the given 32 bit integer but only considering nBits as the
+     *  variable length. For examples, turns 1101 to 1011
+     * @param data data to be reversed
+     * @param nBits number of bits of the data
+     * @return integer with reversed bits
+     */
+     public static int reverseBits(int data, int nBits){
+         int reversed = 0;
+
+         while (data != 0 && nBits > 0){
+             reversed <<= 1;
+             reversed |=  data & 1;
+             data >>= 1;
+             --nBits;
+         }
+
+         return reversed;
+     }
 }
