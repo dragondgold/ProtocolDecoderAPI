@@ -9,7 +9,7 @@ public abstract class Protocol {
      * Protocol types
      */
 	public enum ProtocolType {
-		I2C(1), UART(2), CLOCK(3), SPI(4), NONE(-1);
+		I2C(1), UART(2), CLOCK(3), SPI(4), ONEWIRE(5), NONE(-1);
 		
 		private final int value;
 		private ProtocolType(int value){

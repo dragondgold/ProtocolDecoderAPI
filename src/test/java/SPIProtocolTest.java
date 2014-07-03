@@ -1,5 +1,3 @@
-package test.com.protocolanalyzer.api; 
-
 import com.protocolanalyzer.api.Clock;
 import com.protocolanalyzer.api.LogicBitSet;
 import com.protocolanalyzer.api.LogicHelper;

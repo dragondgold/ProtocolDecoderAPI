@@ -1,5 +1,3 @@
-package test.com.protocolanalyzer.api; 
-
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.protocolanalyzer.api.Clock;
