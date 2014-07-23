@@ -3,35 +3,49 @@ package com.protocolanalyzer.api;
 import java.util.BitSet;
 
 /**
- * Esta clase es una extensión de la clase BitSet. Agrega funcionalidades como b'usqueda de flancos de subida
- * y bajada y la mitad de un bit en alto
+ * Extended functionality of the {@link java.util.BitSet} class adding features like falling/rising edge detection
  */
 public class LogicBitSet extends BitSet{
 
 	private static final long serialVersionUID = 1L;
-	private int currentSize;
+	private int currentSize = 0;
 
-	@Override
+    public LogicBitSet(){
+        super();
+    }
+
+    public LogicBitSet(int size){
+        super(size);
+    }
+
+    // Copy constructor
+    public LogicBitSet(LogicBitSet logicBitSet){
+        for(int n = 0; n < logicBitSet.length(); ++n){
+            set(n, logicBitSet.get(n));
+        }
+    }
+
+    @Override
 	public void set(int index, boolean state) {
-		if(index > currentSize) currentSize = index;
+		if(index >= currentSize) currentSize = index;
 		super.set(index, state);
 	}
 
 	@Override
 	public void set(int index) {
-		if(index > currentSize) currentSize = index;
+		if(index >= currentSize) currentSize = index;
 		super.set(index);
 	}
-	
+
 	@Override
 	public void set(int fromIndex, int toIndex, boolean state) {
-		if(toIndex > currentSize) currentSize = toIndex;
+		if(toIndex >= currentSize) currentSize = toIndex;
 		super.set(fromIndex, toIndex, state);
 	}
 
 	@Override
 	public void set(int fromIndex, int toIndex) {
-		if(toIndex > currentSize) currentSize = toIndex;
+		if(toIndex >= currentSize) currentSize = toIndex;
 		super.set(fromIndex, toIndex);
 	}
 
@@ -43,13 +57,13 @@ public class LogicBitSet extends BitSet{
 
 	@Override
 	public void clear(int index) {
-		if(index > currentSize) currentSize = index;
+		if(index >= currentSize) currentSize = index;
 		super.clear(index);
 	}
 	
 	@Override
 	public void clear(int fromIndex, int toIndex) {
-		if(toIndex > currentSize) currentSize = toIndex;
+		if(toIndex >= currentSize) currentSize = toIndex;
 		super.clear(fromIndex, toIndex);
 	}
 
@@ -58,18 +72,9 @@ public class LogicBitSet extends BitSet{
 	 */
 	@Override
 	public int length() {
-		return currentSize;
+		return currentSize == 0 ? 0 : currentSize + 1;
 	}
 
-	public LogicBitSet(){
-		super();
-		currentSize = 0;
-	}
-
-	public LogicBitSet(int size){
-		super(size);
-	}
-	
 	/**
      * Search for the next falling edge starting in the given index
 	 * @param index where to start searching
