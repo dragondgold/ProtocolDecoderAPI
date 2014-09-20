@@ -19,7 +19,9 @@ The bits which are going to be decoded must be saved on `logicData` member of `P
 
 ## Features
 * Master-Slave I2C Protocol decoding
-* UART protocol decoding
+* UART Protocol decoding
+* SPI Protocol decoding (Beta)
+* 1-Wire Protocol decoding (Beta)
 
 ## License
 
